@@ -6,8 +6,8 @@ program_OBJS := $(program_C_OBJS)
 program_INCLUDE_DIRS := /mt/fielding-home/hemingway/code/fourier-methods/
 program_LIBRARY_DIRS := /mt/fielding-home/hemingway/code/fourier-methods/
 program_LIBRARIES := pthread gsl gslcblas ffs fftw3 m
-#program_FLAGS := -Wall -Wextra -O3 -std=c99 -Wshadow # speed
-program_FLAGS := -Wall -Wextra -g -std=c99 -Wshadow # debug
+program_FLAGS := -Wall -Wextra -O3 -std=c99 -Wshadow # speed
+#program_FLAGS := -Wall -Wextra -g -std=c99 -Wshadow # debug
 
 CFLAGS += $(foreach includedir,$(program_INCLUDE_DIRS),-I$(includedir))
 CFLAGS += $(program_FLAGS)
