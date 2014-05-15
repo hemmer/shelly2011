@@ -36,7 +36,7 @@ double Wi, beta;                        // dimensionless paramters
 // numerical parameters //////////////////
 int iterations;                         // how many loops have we made
 double dt, t, tmax;                     // timestep, time, max time
-double t_kick_2D = 10;                  // when is perturbation added
+double t_kick_2D = 100;                  // when is perturbation added
 
 gsl_rng * rng;     // random number generator
 
@@ -67,7 +67,7 @@ int main(int argc, char **argv)
 
     if (TRUE)
     {
-        const int printFreq = (int) (0.1 / dt);
+        const int printFreq = (int) (tmax * 0.001 / dt);
         for (t = 0.0, iterations = 0; t < tmax; t += dt, ++iterations)
         {
             updateSystemFull();
@@ -75,7 +75,6 @@ int main(int argc, char **argv)
             if (iterations % printFreq == 0)
             {
                 fprintf (stderr, "%f\n", t);
-
                 print1D();
                 print2D();
 
@@ -103,7 +102,7 @@ void updateSystemFull()
 
     solveOldroydBLocal();
 
-    /*solveDiffusion(numS, SRe, SIm, &S_FORWARD, &S_BACKWARD, S_LUT);*/
+    solveDiffusion(numS, SRe, SIm, &S_FORWARD, &S_BACKWARD, S_LUT);
 
     solveOldroydBStress();
 
@@ -119,14 +118,16 @@ void initialiseSystem()
             S(i, j, XX) = S(i, j, YY) = 1.0;
             S(i, j, XY) = 0.0;
 
-            const double xx = Lx * (double) i / (double) Nx;
-            const double yy = Ly * (double) j / (double) Ny;
+            const double xx = Lx * (double) i / (double) Nx - Lx / 2.0;
+            const double yy = Ly * (double) j / (double) Ny - Ly / 2.0;
 
             Pi(i, j, XX) = Pi(i, j, XY) = Pi(i, j, YY) = 0.0;
 
+            // factor of -1 here as FlowSolver assumes forces
+            // have same sign as stress
+            f(i, j, X) = -2.0 * sin(xx) * cos(yy);
+            f(i, j, Y) = +2.0 * cos(xx) * sin(yy);
 
-            f(i, j, X) = +2.0 * sin(xx) * cos(yy);
-            f(i, j, Y) = -2.0 * cos(xx) * sin(yy);
         }
 
     solveFlowField();
@@ -206,8 +207,9 @@ void solveOldroydBStress()
 
 void print1D()
 {
+    int j = 3 * Ny / 4;
     for (int i = 0; i < Nx; ++i)
-        printf ("%f %f\n", Lx * i / (double) Nx, v(i, 0, X));
+        printf ("%f %f %f\n", Lx * i / (double) Nx, v(i, j, Y), K(i, j, XY));
 
     /*printf ("%f %f\n", j / (double) Ny, S(Nx / 2, j, XX));*/
     printf ("\n");
@@ -265,12 +267,15 @@ void print2D()
             fprintf (outputFile, "%f\t%f\t", du, dv);
 
             // vorticity (Shelly defines vorticity with a factor of -1
-            const double vorticity = -(K(i, j, XY) - K(i, j, YX));
+            const double vorticity = +(K(i, j, XY) - K(i, j, YX));
             fprintf (outputFile, "%11.9g \t", vorticity);
 
             const double fmag = sqrt( f(i, j, X)*f(i, j, X) + f(i, j, Y)*f(i, j, Y));
             fprintf (outputFile, "%f\t", fmag);
             fprintf (outputFile, "%f\t%f\t", f(i, j, X) / fmag, f(i, j, Y) / fmag);
+
+
+            fprintf (outputFile, "%f\t%f\t%f\t%f\t", K(i, j, XX), K(i, j, XY), K(i, j, YX), K(i, j, YY));
 
             fprintf (outputFile, "\n");
         }

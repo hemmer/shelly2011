@@ -23,4 +23,9 @@ echo "./shelly $@ > output-data"
 ./process_images.sh vort
 ./process_images.sh v
 
+./process_images.sh Kxx
+./process_images.sh Kyx
+./process_images.sh Kxy
+./process_images.sh Kyy
+
 exit 0

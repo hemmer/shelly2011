@@ -48,6 +48,15 @@ elif [ "$quantity" == "f" ]; then
     quantity_col=11; quantity_x_col=12; quantity_y_col=13
     vector_str="vectors head size 0.05,20,60 filled"
 
+elif [ "$quantity" == "Kxx" ]; then
+    quantity_col=14
+elif [ "$quantity" == "Kxy" ]; then
+    quantity_col=15
+elif [ "$quantity" == "Kyx" ]; then
+    quantity_col=16
+elif [ "$quantity" == "Kyy" ]; then
+    quantity_col=17
+
 
 # calculated from existing
 elif [ "$quantity" == "Q" ]; then
